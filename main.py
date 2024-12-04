@@ -6,6 +6,7 @@ from number import generate_menu_code
 from pypinyin import lazy_pinyin
 import re
 from up_sql import DatabaseUploader
+from difference import MenuDifferenceCalculator
 
 def convert_to_code(name):
     # 移除所有符號和空格，只保留字母和數字
@@ -85,19 +86,6 @@ def process_menu_codes():
     except Exception as e:
         messagebox.showerror("錯誤", f"處理過程中發生錯誤：{str(e)}")
 
-# 創建主視窗
-root = tk.Tk()
-root.title("菜牌管理程式")
-root.geometry("300x300")  # 調整視窗大小以容納新按鈕
-
-# 創建主框架
-main_frame = tk.Frame(root, padx=20, pady=20)
-main_frame.pack(expand=True, fill='both')
-
-# 創建產生編號按鈕
-btn_generate = tk.Button(main_frame, text="產生菜牌編號", command=process_menu_codes)
-btn_generate.pack(pady=20)
-
 def upload_to_database():
     file_path = filedialog.askopenfilename(
         filetypes=[("Excel files", "*.xlsx *.xls")]
@@ -106,9 +94,39 @@ def upload_to_database():
         uploader = DatabaseUploader()
         uploader.upload_file(file_path)
 
-# 創建上傳資料庫按鈕
-btn_upload = tk.Button(main_frame, text="上傳到資料庫", command=upload_to_database)
-btn_upload.pack(pady=20)
+def filter_menu_codes():
+    calculator = MenuDifferenceCalculator()
+    calculator.calculate_difference()
 
-# 啟動主循環
-root.mainloop()
+def main():
+    # 創建主視窗
+    root = tk.Tk()
+    root.title("菜牌管理程式")
+    root.geometry("300x400")  # 調整視窗大小
+
+    # 創建主框架
+    main_frame = tk.Frame(root, padx=20, pady=20)
+    main_frame.pack(expand=True, fill='both')
+
+    # 創建產生編號按鈕
+    btn_generate = tk.Button(main_frame, text="菜牌編號產生", command=process_menu_codes)
+    btn_generate.pack(pady=20)
+
+    # 創建上傳資料庫按鈕
+    btn_upload = tk.Button(main_frame, text="上傳到資料庫", command=upload_to_database)
+    btn_upload.pack(pady=20)
+
+    # 創建篩選按鈕
+    btn_filter = tk.Button(
+        main_frame,
+        text="篩選菜牌",
+        command=filter_menu_codes,
+        height=2
+    )
+    btn_filter.pack(pady=20)
+
+    # 啟動主循環
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()

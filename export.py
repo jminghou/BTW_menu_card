@@ -48,7 +48,7 @@ class DatabaseExporter:
             
             # 查詢資料
             query = """
-            SELECT 序號, 餐廳編號, 餐廳, 餐點編號, 菜牌編號, 餐點名稱, 英文名稱
+            SELECT 序號, 餐廳編號, 餐廳名稱, 餐點編號, 菜牌編號, 餐點名稱, 英文名稱
             FROM menu_items
             ORDER BY 序號
             """
@@ -58,7 +58,7 @@ class DatabaseExporter:
             # 寫入文件
             with open(file_path, 'w', encoding='utf-8') as f:
                 # 寫入標題列
-                headers = ["序號", "餐廳編號", "餐廳", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱"]
+                headers = ["序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱"]
                 f.write('\t'.join(headers) + '\n')
                 
                 # 寫入資料列

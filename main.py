@@ -7,6 +7,7 @@ from pypinyin import lazy_pinyin
 import re
 from up_sql import DatabaseUploader
 from difference import MenuDifferenceCalculator
+from clean import clean_excel_file
 
 def convert_to_code(name):
     # 移除所有符號和空格，只保留字母和數字
@@ -25,63 +26,57 @@ def convert_to_code(name):
 
 def process_menu_codes():
     try:
-        # 檢查input/build目錄是否存在
-        input_dir = "input/build"
-        if not os.path.exists(input_dir):
-            messagebox.showerror("錯誤", "找不到input/build目錄")
+        # 讓用戶選擇Excel文件
+        file_path = filedialog.askopenfilename(
+            title="選擇要產生編號的Excel文件",
+            filetypes=[("Excel files", "*.xlsx *.xls")]
+        )
+        
+        if not file_path:
+            return
+            
+        try:
+            # 讀取Excel檔案
+            df = pd.read_excel(file_path)
+        except Exception as e:
+            messagebox.showerror("錯誤", f"無法讀取檔案：{str(e)}")
             return
 
-        # 獲取目錄中的所有Excel檔案
-        excel_files = [f for f in os.listdir(input_dir) if f.endswith(('.xlsx', '.xls'))]
+        # 尋找必要的欄位
+        menu_name_col = None
+        restaurant_col = None
+        for col in df.columns:
+            if "餐點名稱" in col:
+                menu_name_col = col
+            if "餐廳" in col:
+                restaurant_col = col
         
-        if not excel_files:
-            messagebox.showerror("錯誤", "在input/build目錄中找不到Excel檔案")
+        if menu_name_col is None:
+            messagebox.showerror("錯誤", "找不到'餐點名稱'欄位")
+            return
+            
+        if restaurant_col is None:
+            messagebox.showerror("錯誤", "找不到'餐廳'欄位")
             return
 
-        for excel_file in excel_files:
-            file_path = os.path.join(input_dir, excel_file)
-            
-            try:
-                # 讀取Excel檔案
-                df = pd.read_excel(file_path)
-            except Exception as e:
-                messagebox.showerror("錯誤", f"無法讀取檔案 {excel_file}：{str(e)}")
-                continue
-
-            # 尋找必要的欄位
-            menu_name_col = None
-            restaurant_col = None
-            for col in df.columns:
-                if "餐點名稱" in col:
-                    menu_name_col = col
-                if "餐廳" in col:
-                    restaurant_col = col
-            
-            if menu_name_col is None:
-                messagebox.showerror("錯誤", f"在{excel_file}中找不到'餐點名稱'欄位")
-                continue
-                
-            if restaurant_col is None:
-                messagebox.showerror("錯誤", f"在{excel_file}中找不到'餐廳'欄位")
-                continue
-
-            # 生成餐點編號
-            df["餐點編號"] = df[menu_name_col].astype(str).apply(generate_menu_code)
-            
-            # 生成餐廳編號
-            df["餐廳編號"] = df[restaurant_col].astype(str).apply(convert_to_code)
-            
-            # 組合完整編號
-            df["菜牌編號"] = df["餐廳編號"] + "-" + df["餐點編號"]
-            
-            # 生成新檔名
-            file_name = os.path.splitext(excel_file)[0]
-            new_file_path = os.path.join(input_dir, f"{file_name}_with_codes.xlsx")
-            
-            # 儲存新檔案
-            df.to_excel(new_file_path, index=False)
+        # 生成餐點編號
+        df["餐點編號"] = df[menu_name_col].astype(str).apply(generate_menu_code)
         
-        messagebox.showinfo("成功", "已完成所有Excel檔案的處理")
+        # 生成餐廳編號
+        df["餐廳編號"] = df[restaurant_col].astype(str).apply(convert_to_code)
+        
+        # 組合完整編號
+        df["菜牌編號"] = df["餐廳編號"] + "-" + df["餐點編號"]
+        
+        # 生成新檔名
+        file_dir = os.path.dirname(file_path)
+        file_name = os.path.splitext(os.path.basename(file_path))[0]
+        new_file_path = os.path.join(file_dir, f"{file_name}_with_codes.xlsx")
+        
+        # 儲存新檔案
+        df.to_excel(new_file_path, index=False)
+        
+        messagebox.showinfo("成功", f"已完成編號產生，檔案已儲存為：\n{new_file_path}")
         
     except Exception as e:
         messagebox.showerror("錯誤", f"處理過程中發生錯誤：{str(e)}")
@@ -108,6 +103,15 @@ def main():
     main_frame = tk.Frame(root, padx=20, pady=20)
     main_frame.pack(expand=True, fill='both')
 
+    # 創建清理資料按鈕
+    btn_clean = tk.Button(
+        main_frame,
+        text="清理資料",
+        command=clean_excel_file,
+        height=2
+    )
+    btn_clean.pack(pady=20)
+
     # 創建產生編號按鈕
     btn_generate = tk.Button(main_frame, text="菜牌編號產生", command=process_menu_codes)
     btn_generate.pack(pady=20)
@@ -116,7 +120,7 @@ def main():
     btn_upload = tk.Button(main_frame, text="上傳到資料庫", command=upload_to_database)
     btn_upload.pack(pady=20)
 
-    # 創建篩選按鈕
+    # 創建篩選按���
     btn_filter = tk.Button(
         main_frame,
         text="篩選菜牌",

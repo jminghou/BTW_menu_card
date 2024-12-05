@@ -37,34 +37,42 @@ class DatabaseUploader:
             if not hasattr(self, 'connection') or self.connection.open == False:
                 self.connect_database()
 
-            # 讀取Excel檔案，跳過第一行（序號）
+            # 讀取Excel檔案
             df = pd.read_excel(file_path)
-            print("=== 調試信息 ===")
-            print("Excel檔案中的實際欄位：")
-            for col in df.columns:
-                print(f"'{col}'")
-            print("=============")
             
-            # 顯示所有欄位名稱，用於調試
-            print("Excel檔案中的欄位：", df.columns.tolist())
-            
-            # 檢查必要欄位（不包含序號，因為會自動生成）
-            required_columns = ['餐廳編號', '餐廳', '餐點編號', '菜牌編號', '餐點名稱']
-            missing_columns = []
-            
-            # 檢查每個必要欄位是否存在
-            for col in required_columns:
-                if col not in df.columns:
-                    missing_columns.append(col)
-                    print(f"缺少欄位: {col}")
+            # 檢查必要欄位
+            required_columns = ['餐廳編號', '餐廳名稱', '餐點編號', '菜牌編號', '餐點名稱', '英文名稱']
+            missing_columns = [col for col in required_columns if col not in df.columns]
             
             if missing_columns:
                 messagebox.showerror("錯誤", f"Excel檔案缺少以下欄位：\n{', '.join(missing_columns)}")
                 return False
-            
+
+            # 檢查資料庫中現有的菜牌編號
+            check_sql = "SELECT 菜牌編號 FROM menu_items"
+            self.cursor.execute(check_sql)
+            existing_codes = {row[0] for row in self.cursor.fetchall()}
+
+            # 檢查新資料中的菜牌編號
+            new_codes = set(df['菜牌編號'].astype(str))
+            duplicate_codes = new_codes.intersection(existing_codes)
+
+            if duplicate_codes:
+                # 顯示重複的菜牌編號
+                duplicate_list = '\n'.join(sorted(duplicate_codes))
+                messagebox.showwarning("警告", 
+                    f"發現重複的菜牌編號，這些記錄將被跳過：\n{duplicate_list}")
+                
+                # 過濾掉重複的記錄
+                df = df[~df['菜牌編號'].astype(str).isin(duplicate_codes)]
+                
+                if df.empty:
+                    messagebox.showinfo("提示", "所有記錄都已存在於資料庫中，沒有新資料需要上傳")
+                    return False
+
             # 添加建檔日期
             df['建檔日期'] = datetime.now()
-            
+
             # 確保英文名稱欄位存在
             if '英文名稱' not in df.columns:
                 df['英文名稱'] = ''
@@ -74,7 +82,7 @@ class DatabaseUploader:
             CREATE TABLE IF NOT EXISTS menu_items (
                 序號 INT AUTO_INCREMENT PRIMARY KEY,
                 餐廳編號 VARCHAR(10) NOT NULL,
-                餐廳 VARCHAR(100) NOT NULL,
+                餐廳名稱 VARCHAR(100) NOT NULL,
                 餐點編號 VARCHAR(10) NOT NULL,
                 菜牌編號 VARCHAR(20) NOT NULL,
                 餐點名稱 VARCHAR(100) NOT NULL,
@@ -88,7 +96,7 @@ class DatabaseUploader:
             # 準備插入語句（不包含序號，因為是自動生成的）
             insert_sql = """
             INSERT INTO menu_items 
-            (餐廳編號, 餐廳, 餐點編號, 菜牌編號, 
+            (餐廳編號, 餐廳名稱, 餐點編號, 菜牌編號, 
              餐點名稱, 英文名稱, 建檔日期)
             VALUES (%s, %s, %s, %s, %s, %s, %s)
             """
@@ -100,7 +108,7 @@ class DatabaseUploader:
                 values = [
                     (
                         str(row['餐廳編號']).strip(),
-                        str(row['餐廳']).strip(),
+                        str(row['餐廳名稱']).strip(),
                         str(row['餐點編號']).strip(),
                         str(row['菜牌編號']).strip(),
                         str(row['餐點名稱']).strip(),
@@ -120,7 +128,6 @@ class DatabaseUploader:
         except Exception as e:
             messagebox.showerror("錯誤", f"上傳過程中發生錯誤：\n{str(e)}")
             print("詳細錯誤：", str(e))
-            print("Excel欄位：", df.columns.tolist())
             return False
 
     def __del__(self):

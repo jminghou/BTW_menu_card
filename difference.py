@@ -120,7 +120,7 @@ class MenuDifferenceCalculator:
                     # 查詢資料
                     placeholders = ','.join(['%s'] * len(self.filtered_codes))
                     sql = f"""
-                    SELECT 序號, 餐廳編號, 餐廳, 餐點編號, 菜牌編號, 餐點名稱, 英文名稱
+                    SELECT 序號, 餐廳編號, 餐廳名稱, 餐點編號, 菜牌編號, 餐點名稱, 英文名稱
                     FROM menu_items
                     WHERE 菜牌編號 IN ({placeholders})
                     ORDER BY 序號
@@ -128,6 +128,18 @@ class MenuDifferenceCalculator:
                     
                     cursor.execute(sql, self.filtered_codes)
                     results = cursor.fetchall()
+
+                    # 檢查哪些編號沒有在查詢結果中
+                    found_codes = {row[4] for row in results}  # 假設菜牌編號是第5個欄位
+                    missing_codes = set(self.filtered_codes) - found_codes
+                    
+                    if missing_codes:
+                        missing_list = '\n'.join(sorted(missing_codes))
+                        if not messagebox.askyesno(
+                            "警告",
+                            f"以下菜牌編號在資料庫中找不到對應資料：\n\n{missing_list}\n\n是否要繼續匯出其他有建檔的項目？"
+                        ):
+                            return
 
                     if not results:
                         messagebox.showerror("錯誤", "在資料庫中找不到相關記錄")
@@ -145,12 +157,12 @@ class MenuDifferenceCalculator:
                     if not file_path:
                         return
 
-                    # 使用 CSV 模組寫入檔案，使用逗號作為分隔符
+                    # 使用 CSV 模組寫入檔案
                     with open(file_path, 'w', encoding='utf-8-sig', newline='') as f:
                         writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
                         
                         # 寫入標題列
-                        headers = ["序號", "餐廳編號", "餐廳", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱"]
+                        headers = ["序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱"]
                         writer.writerow(headers)
                         
                         # 寫入資料列

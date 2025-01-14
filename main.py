@@ -2,29 +2,18 @@ import tkinter as tk
 from tkinter import messagebox, filedialog
 import pandas as pd
 import os
-from number import generate_menu_code
-from pypinyin import lazy_pinyin
-import re
-from up_sql import DatabaseUploader
-from difference import MenuDifferenceCalculator
-from clean import clean_excel_file
+from module.mod_number import process_menu_codes
+from module.mod_sql import DatabaseUploader
+from module.mod_difference import MenuDifferenceCalculator
+from module.mod_clean import clean_excel_file
+import csv
+from tkinter import ttk
+from datetime import datetime
+from module.mod_search import search_menu_codes
+from module.mod_sql_function import DatabaseFunction
+from module.mod_calendar import clean_excel_file
 
-def convert_to_code(name):
-    # 移除所有符號和空格，只保留字母和數字
-    name = re.sub(r'[^\w\s\u4e00-\u9fff]', '', name)
-    
-    # 檢查是否包含中文字符
-    if any('\u4e00' <= char <= '\u9fff' for char in name):
-        # 轉換中文為拼音，並取得首字母
-        pinyin = ''.join([word[0] for word in lazy_pinyin(name)])
-    else:
-        # 如果是英文，移除所有空格
-        pinyin = re.sub(r'\s+', '', name)
-    
-    # 轉換為大寫並取前5個字符
-    return pinyin.upper()[:5]
-
-def process_menu_codes():
+def process_menu_codes_ui():
     try:
         # 讓用戶選擇Excel文件
         file_path = filedialog.askopenfilename(
@@ -35,47 +24,12 @@ def process_menu_codes():
         if not file_path:
             return
             
-        try:
-            # 讀取Excel檔案
-            df = pd.read_excel(file_path)
-        except Exception as e:
-            messagebox.showerror("錯誤", f"無法讀取檔案：{str(e)}")
-            return
-
-        # 尋找必要的欄位
-        menu_name_col = None
-        restaurant_col = None
-        for col in df.columns:
-            if "餐點名稱" in col:
-                menu_name_col = col
-            if "餐廳" in col:
-                restaurant_col = col
+        new_file_path, error = process_menu_codes(file_path)
         
-        if menu_name_col is None:
-            messagebox.showerror("錯誤", "找不到'餐點名稱'欄位")
+        if error:
+            messagebox.showerror("錯誤", error)
             return
             
-        if restaurant_col is None:
-            messagebox.showerror("錯誤", "找不到'餐廳'欄位")
-            return
-
-        # 生成餐點編號
-        df["餐點編號"] = df[menu_name_col].astype(str).apply(generate_menu_code)
-        
-        # 生成餐廳編號
-        df["餐廳編號"] = df[restaurant_col].astype(str).apply(convert_to_code)
-        
-        # 組合完整編號
-        df["菜牌編號"] = df["餐廳編號"] + "-" + df["餐點編號"]
-        
-        # 生成新檔名
-        file_dir = os.path.dirname(file_path)
-        file_name = os.path.splitext(os.path.basename(file_path))[0]
-        new_file_path = os.path.join(file_dir, f"{file_name}_with_codes.xlsx")
-        
-        # 儲存新檔案
-        df.to_excel(new_file_path, index=False)
-        
         messagebox.showinfo("成功", f"已完成編號產生，檔案已儲存為：\n{new_file_path}")
         
     except Exception as e:
@@ -93,41 +47,141 @@ def filter_menu_codes():
     calculator = MenuDifferenceCalculator()
     calculator.calculate_difference()
 
+def search_menu_code():
+    # 獲取文本框中的所有菜牌編號
+    menu_codes = entry_menu_code.get('1.0', tk.END).strip().split('\n')
+    menu_codes = [code.strip() for code in menu_codes if code.strip()]
+    search_menu_codes(menu_codes)
+
+def check_duplicates():
+    db_function = DatabaseFunction()
+    db_function.check_duplicates()
+
+def remove_duplicates():
+    db_function = DatabaseFunction()
+    db_function.remove_duplicates()
+
+def download_all():
+    db_function = DatabaseFunction()
+    db_function.download_all()
+
 def main():
     # 創建主視窗
     root = tk.Tk()
     root.title("菜牌管理程式")
-    root.geometry("300x400")  # 調整視窗大小
+    root.geometry("400x600")  # 調整視窗大小
 
     # 創建主框架
     main_frame = tk.Frame(root, padx=20, pady=20)
     main_frame.pack(expand=True, fill='both')
 
-    # 創建清理資料按鈕
+    # 創建功能按鈕框架
+    button_frame = tk.Frame(main_frame)
+    button_frame.pack(fill='x', pady=20)
+
+    # 設定按鈕共同樣式
+    button_width = 12
+    button_height = 2
+
+    # 創建第一排按鈕（三個並排）
     btn_clean = tk.Button(
-        main_frame,
-        text="清理資料",
+        button_frame,
+        text="資料清洗",
         command=clean_excel_file,
-        height=2
+        width=button_width,
+        height=button_height
     )
-    btn_clean.pack(pady=20)
+    btn_clean.pack(side='left', expand=True, padx=5)
 
-    # 創建產生編號按鈕
-    btn_generate = tk.Button(main_frame, text="菜牌編號產生", command=process_menu_codes)
-    btn_generate.pack(pady=20)
+    btn_generate = tk.Button(
+        button_frame,
+        text="菜牌編號產生",
+        command=process_menu_codes_ui,
+        width=button_width,
+        height=button_height
+    )
+    btn_generate.pack(side='left', expand=True, padx=5)
 
-    # 創建上傳資料庫按鈕
-    btn_upload = tk.Button(main_frame, text="上傳到資料庫", command=upload_to_database)
-    btn_upload.pack(pady=20)
+    btn_upload = tk.Button(
+        button_frame,
+        text="上傳資料庫",
+        command=upload_to_database,
+        width=button_width,
+        height=button_height
+    )
+    btn_upload.pack(side='left', expand=True, padx=5)
 
-    # 創建篩選按���
+    # 在第一排按鈕之後，添加第二排按鈕
+    button_frame2 = tk.Frame(main_frame)
+    button_frame2.pack(fill='x', pady=20)
+
+    # 創建第二排按鈕（四個並排）
+    btn_check = tk.Button(
+        button_frame2,
+        text="檢查重複",
+        command=check_duplicates,
+        width=button_width,
+        height=button_height
+    )
+    btn_check.pack(side='left', expand=True, padx=5)
+
+    btn_remove = tk.Button(
+        button_frame2,
+        text="刪除重複",
+        command=remove_duplicates,
+        width=button_width,
+        height=button_height
+    )
+    btn_remove.pack(side='left', expand=True, padx=5)
+
+    btn_download = tk.Button(
+        button_frame2,
+        text="下載菜牌",
+        command=download_all,
+        width=button_width,
+        height=button_height
+    )
+    btn_download.pack(side='left', expand=True, padx=5)
+
+    btn_calendar = tk.Button(
+        button_frame2,
+        text="輸出美食報報",
+        command=clean_excel_file,
+        width=button_width,
+        height=button_height
+    )
+    btn_calendar.pack(side='left', expand=True, padx=5)
+
+    # 創建篩選按鈕
     btn_filter = tk.Button(
         main_frame,
         text="篩選菜牌",
         command=filter_menu_codes,
         height=2
     )
-    btn_filter.pack(pady=20)
+    btn_filter.pack(pady=20, fill='x')
+
+    # 創建搜尋框架（移到底部）
+    search_frame = ttk.LabelFrame(main_frame, text="搜尋菜牌 (可複製多個編號，每行一個)", padding=(10, 5))
+    search_frame.pack(fill='both', expand=True, pady=(0, 10))
+
+    # 將 Entry 改為 Text，並設定更大的高度
+    global entry_menu_code
+    entry_menu_code = tk.Text(search_frame, height=15, width=20)
+    entry_menu_code.pack(side='left', padx=(0, 5), fill='both', expand=True)
+    
+    # 添加垂直滾動條
+    scrollbar = ttk.Scrollbar(search_frame, orient="vertical", command=entry_menu_code.yview)
+    scrollbar.pack(side='right', fill='y')
+    entry_menu_code.configure(yscrollcommand=scrollbar.set)
+    
+    # 搜尋按鈕
+    btn_search = ttk.Button(
+        main_frame,
+        text="搜尋",
+        command=search_menu_code
+    )
+    btn_search.pack(fill='x')  # 調整按鈕位置
 
     # 啟動主循環
     root.mainloop()

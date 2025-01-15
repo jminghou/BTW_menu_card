@@ -5,13 +5,14 @@ import os
 from module.mod_number import process_menu_codes
 from module.mod_sql import DatabaseUploader
 from module.mod_difference import MenuDifferenceCalculator
-from module.mod_clean import clean_excel_file
+from module.mod_clean import clean_excel_file as clean_excel_file_original
+from module.mod_calendar import clean_excel_file as clean_excel_file_calendar
 import csv
 from tkinter import ttk
 from datetime import datetime
 from module.mod_search import search_menu_codes
 from module.mod_sql_function import DatabaseFunction
-from module.mod_calendar import clean_excel_file
+from module.mod_dif_restairamt import RestaurantDifferenceCalculator
 
 def process_menu_codes_ui():
     try:
@@ -65,6 +66,10 @@ def download_all():
     db_function = DatabaseFunction()
     db_function.download_all()
 
+def filter_restaurants():
+    calculator = RestaurantDifferenceCalculator()
+    calculator.calculate_difference()
+
 def main():
     # 創建主視窗
     root = tk.Tk()
@@ -87,7 +92,7 @@ def main():
     btn_clean = tk.Button(
         button_frame,
         text="資料清洗",
-        command=clean_excel_file,
+        command=clean_excel_file_original,
         width=button_width,
         height=button_height
     )
@@ -146,7 +151,7 @@ def main():
     btn_calendar = tk.Button(
         button_frame2,
         text="輸出美食報報",
-        command=clean_excel_file,
+        command=clean_excel_file_calendar,
         width=button_width,
         height=button_height
     )
@@ -159,7 +164,16 @@ def main():
         command=filter_menu_codes,
         height=2
     )
-    btn_filter.pack(pady=20, fill='x')
+    btn_filter.pack(pady=(20,10), fill='x')
+
+    # 新增餐廳篩選按鈕
+    btn_filter_restaurant = tk.Button(
+        main_frame,
+        text="篩選餐廳牌",
+        command=filter_restaurants,
+        height=2
+    )
+    btn_filter_restaurant.pack(pady=(0,20), fill='x')
 
     # 創建搜尋框架（移到底部）
     search_frame = ttk.LabelFrame(main_frame, text="搜尋菜牌 (可複製多個編號，每行一個)", padding=(10, 5))

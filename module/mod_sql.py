@@ -3,6 +3,7 @@ from datetime import datetime
 from tkinter import messagebox
 import pymysql
 import os
+from module.config_sql import DB_CONFIG
 
 class DatabaseUploader:
     def __init__(self):
@@ -10,13 +11,7 @@ class DatabaseUploader:
 
     def connect_database(self):
         try:
-            self.connection = pymysql.connect(
-                host='localhost',
-                user='root',
-                password='12345678',
-                database='db_mediatek_menu',
-                charset='utf8mb4'
-            )
+            self.connection = pymysql.connect(**DB_CONFIG)
             self.cursor = self.connection.cursor()
         except Exception as e:
             messagebox.showerror("錯誤", f"資料庫連接失敗：\n{str(e)}")

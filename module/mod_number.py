@@ -53,8 +53,15 @@ def process_menu_codes(file_path):
     import os
     
     try:
+        # 檢查文件是否存在
+        if not os.path.exists(file_path):
+            return None, "文件不存在"
+            
         # 讀取Excel檔案
         df = pd.read_excel(file_path)
+        
+        if df.empty:
+            return None, "文件是空的"
         
         # 尋找必要的欄位
         menu_name_col = None
@@ -90,5 +97,7 @@ def process_menu_codes(file_path):
         
         return new_file_path, None
         
+    except pd.errors.EmptyDataError:
+        return None, "文件是空的或格式不正確"
     except Exception as e:
-        return None, str(e) 
+        return None, f"處理文件時發生錯誤: {str(e)}" 

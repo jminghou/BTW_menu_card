@@ -57,7 +57,7 @@ def search_menu_codes(menu_codes):
         results = uploader.search_menu_codes(menu_codes)
         
         # 檢查哪些編號沒有找到
-        found_codes = {row[4] for row in results}  # 假設菜牌編號是第5個欄位
+        found_codes = {row[5] for row in results}  # 現在菜牌編號是第6個欄位，因為第1個欄位是表名
         missing_codes = set(menu_codes) - found_codes
         
         if missing_codes:
@@ -88,8 +88,8 @@ def search_menu_codes(menu_codes):
         # 寫入CSV檔案
         with open(file_path, 'w', newline='', encoding='utf-8-sig') as f:
             writer = csv.writer(f)
-            # 寫入標題
-            headers = ["序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱", "建檔日期"]
+            # 寫入標題，加入表名欄位
+            headers = ["資料表", "序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱", "建檔日期"]
             writer.writerow(headers)
             # 寫入資料
             for row in results:

@@ -39,3 +39,5 @@ input/
 output/
 *.xlsx
 *.xls 
+
+delete/

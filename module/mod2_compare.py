@@ -41,14 +41,35 @@ class MenuCodeComparator:
             except:
                 # 如果连接无效，重新连接
                 self.connect_database()
-                
-            query = "SELECT 菜牌編號 FROM menu_items"
-            self.cursor.execute(query)
-            results = self.cursor.fetchall()
             
-            # 从结果集中提取菜牌编号
-            existing_codes = {row[0] for row in results}
-            return existing_codes
+            # 需要搜尋的表格清單
+            tables = ['med_tpr', 'med_tpx', 'med_sun', 'menu_items']
+            
+            all_codes = set()
+            
+            # 從每個表格中獲取菜牌編號
+            for table in tables:
+                # 檢查表格是否存在
+                check_table_sql = f"""
+                SELECT COUNT(*) 
+                FROM information_schema.tables 
+                WHERE table_schema = DATABASE() 
+                AND table_name = '{table}'
+                """
+                self.cursor.execute(check_table_sql)
+                if self.cursor.fetchone()[0] == 0:
+                    continue  # 表格不存在，跳過
+                
+                # 從該表格中獲取菜牌編號
+                query = f"SELECT 菜牌編號 FROM {table}"
+                self.cursor.execute(query)
+                results = self.cursor.fetchall()
+                
+                # 將結果加入到集合中
+                table_codes = {row[0] for row in results}
+                all_codes.update(table_codes)
+            
+            return all_codes
             
         except Exception as e:
             messagebox.showerror("錯誤", f"獲取菜牌編號時發生錯誤：\n{str(e)}")

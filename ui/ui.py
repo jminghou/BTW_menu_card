@@ -11,6 +11,7 @@ from module.mod_sql_function import DatabaseFunction
 from module.mod_dif_restairamt import RestaurantDifferenceCalculator
 from module.mod2_compare import compare_menu_codes
 from module.mod2_utf8 import convert_csv_to_unicode_txt
+from module.mod4_new_menu_restaurant import export_new_menus, export_new_restaurants
 
 class MenuCardUI:
     def __init__(self, root=None):
@@ -56,33 +57,6 @@ class MenuCardUI:
         )
         btn_generate.pack(side='left', expand=True, padx=5)
 
-        # 創建篩選按鈕
-        btn_filter = tk.Button(
-            main_frame,
-            text="篩選菜牌",
-            command=self.filter_menu_codes,
-            height=2
-        )
-        btn_filter.pack(pady=(0,10), fill='x')
-
-        # 新增餐廳篩選按鈕
-        btn_filter_restaurant = tk.Button(
-            main_frame,
-            text="篩選餐廳牌",
-            command=self.filter_restaurants,
-            height=2
-        )
-        btn_filter_restaurant.pack(pady=(0,20), fill='x')
-
-        # 新增比對菜牌編號按鈕
-        btn_compare = tk.Button(
-            main_frame,
-            text="比對菜牌編號",
-            command=self.compare_menu_codes,
-            height=2
-        )
-        btn_compare.pack(pady=(0,10), fill='x')
-
         # 上傳資料庫改成獨立一排的長按鈕
         btn_upload = tk.Button(
             main_frame,
@@ -91,6 +65,88 @@ class MenuCardUI:
             height=2
         )
         btn_upload.pack(pady=(0,10), fill='x')
+
+        # 創建"下載無英文菜單"和"上傳菜單英文名稱"按鈕框架（替代原來的"篩選菜牌"按鈕）
+        no_english_frame = tk.Frame(main_frame)
+        no_english_frame.pack(fill='x', pady=(0, 10))
+
+        # 下載無英文菜單
+        btn_download_no_english = tk.Button(
+            no_english_frame,
+            text="下載無英文菜單",
+            command=self.download_no_english,
+            width=button_width,
+            height=button_height
+        )
+        btn_download_no_english.pack(side='left', expand=True, padx=5)
+
+        # 上傳菜單英文名稱
+        btn_upload_english = tk.Button(
+            no_english_frame,
+            text="上傳菜單英文名稱",
+            command=self.upload_english,
+            width=button_width,
+            height=button_height
+        )
+        btn_upload_english.pack(side='left', expand=True, padx=5)
+
+        # 刪除重複菜牌編號按鈕
+        btn_remove_duplicates = tk.Button(
+            main_frame,
+            text="刪除重複菜牌編號",
+            command=self.remove_duplicates,
+            height=2
+        )
+        btn_remove_duplicates.pack(pady=(0,10), fill='x')
+
+        # 新增兩組文字輸入框和按鈕
+        # 第一組：新菜牌
+        new_menu_frame = tk.Frame(main_frame)
+        new_menu_frame.pack(fill='x', pady=(0, 10))
+        
+        # 新菜牌輸入框
+        self.entry_new_menu = tk.Entry(new_menu_frame)
+        self.entry_new_menu.pack(side='left', fill='x', expand=True, padx=(0, 5))
+        # 添加預視文字
+        self.entry_new_menu.insert(0, "YYYYMMDD-YYYYMMDD或YYYYMMDD")
+        # 設置焦點事件，當獲得焦點時清空預設文字
+        self.entry_new_menu.bind("<FocusIn>", lambda event: self.on_entry_focus_in(event, self.entry_new_menu, "YYYYMMDD-YYYYMMDD或YYYYMMDD"))
+        # 設置失去焦點事件，當輸入框為空時恢復預設文字
+        self.entry_new_menu.bind("<FocusOut>", lambda event: self.on_entry_focus_out(event, self.entry_new_menu, "YYYYMMDD-YYYYMMDD或YYYYMMDD"))
+        
+        # 新菜牌按鈕
+        btn_new_menu = tk.Button(
+            new_menu_frame,
+            text="新菜牌",
+            height=1,
+            width=button_width,
+            command=self.export_new_menus
+        )
+        btn_new_menu.pack(side='right')
+
+        # 第二組：新餐廳
+        new_restaurant_frame = tk.Frame(main_frame)
+        new_restaurant_frame.pack(fill='x', pady=(0, 10))
+        
+        # 新餐廳輸入框
+        self.entry_new_restaurant = tk.Entry(new_restaurant_frame)
+        self.entry_new_restaurant.pack(side='left', fill='x', expand=True, padx=(0, 5))
+        # 添加預視文字
+        self.entry_new_restaurant.insert(0, "YYYYMMDD-YYYYMMDD或YYYYMMDD")
+        # 設置焦點事件，當獲得焦點時清空預設文字
+        self.entry_new_restaurant.bind("<FocusIn>", lambda event: self.on_entry_focus_in(event, self.entry_new_restaurant, "YYYYMMDD-YYYYMMDD或YYYYMMDD"))
+        # 設置失去焦點事件，當輸入框為空時恢復預設文字
+        self.entry_new_restaurant.bind("<FocusOut>", lambda event: self.on_entry_focus_out(event, self.entry_new_restaurant, "YYYYMMDD-YYYYMMDD或YYYYMMDD"))
+        
+        # 新餐廳按鈕
+        btn_new_restaurant = tk.Button(
+            new_restaurant_frame,
+            text="新餐廳",
+            height=1,
+            width=button_width,
+            command=self.export_new_restaurants
+        )
+        btn_new_restaurant.pack(side='right')
 
         # 新增下載菜牌按鈕
         btn_download = tk.Button(
@@ -101,27 +157,6 @@ class MenuCardUI:
         )
         btn_download.pack(pady=(0,10), fill='x')
 
-        # 創建搜尋框架（移到底部）
-        search_frame = ttk.LabelFrame(main_frame, text="搜尋菜牌 (可複製多個編號，每行一個)", padding=(10, 5))
-        search_frame.pack(fill='both', expand=True, pady=(0, 10))
-
-        # 將 Entry 改為 Text，並設定更大的高度
-        self.entry_menu_code = tk.Text(search_frame, height=15, width=20)
-        self.entry_menu_code.pack(side='left', padx=(0, 5), fill='both', expand=True)
-        
-        # 添加垂直滾動條
-        scrollbar = ttk.Scrollbar(search_frame, orient="vertical", command=self.entry_menu_code.yview)
-        scrollbar.pack(side='right', fill='y')
-        self.entry_menu_code.configure(yscrollcommand=scrollbar.set)
-        
-        # 搜尋按鈕
-        btn_search = ttk.Button(
-            main_frame,
-            text="搜尋",
-            command=self.search_menu_code
-        )
-        btn_search.pack(fill='x')  # 調整按鈕位置
-
         # 新增轉換CSV到TXT按鈕
         btn_convert_csv = tk.Button(
             main_frame,
@@ -130,6 +165,16 @@ class MenuCardUI:
             height=2
         )
         btn_convert_csv.pack(pady=(0,10), fill='x')
+
+    def on_entry_focus_in(self, event, entry, placeholder_text):
+        """當輸入框獲得焦點時，如果內容是預設文字則清空"""
+        if entry.get() == placeholder_text:
+            entry.delete(0, tk.END)
+
+    def on_entry_focus_out(self, event, entry, placeholder_text):
+        """當輸入框失去焦點時，如果內容為空則恢復預設文字"""
+        if entry.get() == '':
+            entry.insert(0, placeholder_text)
 
     def run(self):
         self.root.mainloop()
@@ -224,4 +269,41 @@ class MenuCardUI:
         )
         if file_paths:
             convert_csv_to_unicode_txt(file_paths)
+        
+    def download_no_english(self):
+        from module.mod3_no_english import download_no_english_menus
+        download_no_english_menus()
+        
+    def upload_english(self):
+        # 上傳菜單英文名稱功能
+        from module.mod3_input_english import upload_english_names
+        upload_english_names()
+        
+    def export_new_menus(self):
+        """導出指定日期區間內的新菜牌"""
+        date_range = self.entry_new_menu.get().strip()
+        if not date_range:
+            messagebox.showwarning("警告", "請輸入日期區間，格式為 YYYYMMDD-YYYYMMDD 或單一日期 YYYYMMDD")
+            return
+        
+        # 如果還是預設值，則視為未輸入
+        if date_range == "YYYYMMDD-YYYYMMDD或YYYYMMDD":
+            messagebox.showwarning("警告", "請輸入日期區間，格式為 YYYYMMDD-YYYYMMDD 或單一日期 YYYYMMDD")
+            return
+        
+        export_new_menus(date_range)
+        
+    def export_new_restaurants(self):
+        """導出指定日期區間內的新餐廳"""
+        date_range = self.entry_new_restaurant.get().strip()
+        if not date_range:
+            messagebox.showwarning("警告", "請輸入日期區間，格式為 YYYYMMDD-YYYYMMDD 或單一日期 YYYYMMDD")
+            return
+        
+        # 如果還是預設值，則視為未輸入
+        if date_range == "YYYYMMDD-YYYYMMDD或YYYYMMDD":
+            messagebox.showwarning("警告", "請輸入日期區間，格式為 YYYYMMDD-YYYYMMDD 或單一日期 YYYYMMDD")
+            return
+        
+        export_new_restaurants(date_range)
         

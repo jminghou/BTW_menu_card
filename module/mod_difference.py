@@ -34,7 +34,7 @@ class MenuDifferenceCalculator:
             df1 = pd.read_excel(file1)
             df2 = pd.read_excel(file2)
 
-            # 確��兩個檔案都有 '菜牌編號' 欄位
+            # 確認兩個檔案都有 '菜牌編號' 欄位
             if '菜牌編號' not in df1.columns or '菜牌編號' not in df2.columns:
                 messagebox.showerror("錯誤", "Excel檔案中缺少 '菜牌編號' 欄位")
                 return
@@ -108,61 +108,50 @@ class MenuDifferenceCalculator:
 
             # 使用 DatabaseUploader 類別
             db = DatabaseUploader()
-            try:
-                # 查詢資料
-                results = db.search_menu_codes(self.filtered_codes)
+            
+            # 查詢資料
+            results = db.search_menu_codes(self.filtered_codes)
 
-                # 檢查哪些編號沒有在查詢結果中
-                found_codes = {row[4] for row in results}  # 假設菜牌編號是第5個欄位
-                missing_codes = set(self.filtered_codes) - found_codes
-                
-                if missing_codes:
-                    missing_list = '\n'.join(sorted(missing_codes))
-                    if not messagebox.askyesno(
-                        "警告",
-                        f"以下菜牌編號在資料庫中找不到對應資料：\n\n{missing_list}\n\n是否要繼續匯出其他有建檔的項目？"
-                    ):
-                        return
-
-                if not results:
-                    messagebox.showerror("錯誤", "在資料庫中找不到相關記錄")
+            # 檢查哪些編號沒有在查詢結果中
+            found_codes = {row[5] for row in results}  # 現在菜牌編號是第6個欄位，因為第1個欄位是表名
+            missing_codes = set(self.filtered_codes) - found_codes
+            
+            if missing_codes:
+                missing_list = '\n'.join(sorted(missing_codes))
+                if not messagebox.askyesno(
+                    "警告",
+                    f"以下菜牌編號在資料庫中找不到對應資料：\n\n{missing_list}\n\n是否要繼續匯出其他有建檔的項目？"
+                ):
                     return
 
-                current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-                default_filename = f"menu_filtered_export_{current_time}.csv"
+            if not results:
+                messagebox.showerror("錯誤", "在資料庫中找不到相關記錄")
+                return
+
+            current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+            default_filename = f"menu_filtered_export_{current_time}.csv"
+            
+            file_path = filedialog.asksaveasfilename(
+                defaultextension=".csv",
+                initialfile=default_filename,
+                filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            # 寫入CSV檔案
+            with open(file_path, 'w', newline='', encoding='utf-8-sig') as f:
+                writer = csv.writer(f)
+                # 寫入標題，加入表名欄位
+                headers = ["資料表", "序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱", "建檔日期"]
+                writer.writerow(headers)
+                # 寫入資料
+                for row in results:
+                    writer.writerow(row)
+            
+            messagebox.showinfo("成功", f"成功匯出 {len(results)} 筆資料至 {file_path}")
                 
-                file_path = filedialog.asksaveasfilename(
-                    defaultextension=".csv",
-                    initialfile=default_filename,
-                    filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
-                )
-                
-                if not file_path:
-                    return
-
-                # 使用 CSV 模組寫入檔案
-                with open(file_path, 'w', encoding='utf-8-sig', newline='') as f:
-                    writer = csv.writer(f, delimiter=',', quoting=csv.QUOTE_MINIMAL)
-                    
-                    # 寫入標題列
-                    headers = ["序號", "餐廳編號", "餐廳名稱", "餐點編號", "菜牌編號", "餐點名稱", "英文名稱"]
-                    writer.writerow(headers)
-                    
-                    # 寫入資料列
-                    for row in results:
-                        formatted_row = []
-                        for i, item in enumerate(row):
-                            if i == 0:  # 序號欄位
-                                formatted_row.append(str(int(item)) if item is not None else '')
-                            else:
-                                formatted_row.append(str(item).strip() if item is not None else '')
-                        writer.writerow(formatted_row)
-
-                messagebox.showinfo("成功", f"資料已成功匯出至：\n{file_path}")
-
-            finally:
-                db.close_connection()
-
         except Exception as e:
             messagebox.showerror("錯誤", f"匯出過程中發生錯誤：\n{str(e)}")
 

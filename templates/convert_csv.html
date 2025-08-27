@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}轉換CSV到TXT - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-exchange-alt me-2"></i>轉換CSV到TXT
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">將CSV檔案轉換為帶BOM的UTF-8格式TXT檔案，確保中文內容正確顯示。</p>
+                
+                <form method="POST" enctype="multipart/form-data" id="convertForm">
+                    <div class="mb-4">
+                        <label for="files" class="form-label">選擇CSV檔案（可多選）</label>
+                        <input type="file" class="form-control" id="files" name="files" accept=".csv" multiple required>
+                        <div class="form-text">支援格式：.csv | 可一次選擇多個檔案</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>返回
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-exchange-alt me-1"></i>開始轉換
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 轉換結果 -->
+        {% if result_files %}
+        <div class="card mt-4">
+            <div class="card-header bg-success text-white">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-check-circle me-2"></i>轉換完成
+                </h6>
+            </div>
+            <div class="card-body">
+                <p>成功轉換 {{ result_files|length }} 個檔案：</p>
+                <div class="list-group">
+                    {% for file in result_files %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ file.original }}</strong>
+                            <small class="text-muted d-block">→ {{ file.converted }}</small>
+                        </div>
+                        <a href="{{ url_for('download_file', filename=file.path) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-download me-1"></i>下載
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- 功能說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>轉換說明
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">轉換功能</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>轉換為UTF-8 BOM格式</li>
+                            <li><i class="fas fa-check text-success me-2"></i>保持原始檔案內容完整</li>
+                            <li><i class="fas fa-check text-success me-2"></i>支援批量轉換</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info">用途說明</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>解決Excel中文亂碼問題</li>
+                            <li><i class="fas fa-check text-success me-2"></i>確保跨平台兼容性</li>
+                            <li><i class="fas fa-check text-success me-2"></i>便於數據導入其他系統</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>提示：</strong>BOM（Byte Order Mark）是UTF編碼文件開頭的特殊標記，可以幫助應用程序正確識別文件編碼格式，特別是在Excel等軟體中顯示中文內容。
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('convertForm').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>轉換中...';
+    submitBtn.disabled = true;
+});
+
+// 顯示選擇的檔案數量
+document.getElementById('files').addEventListener('change', function() {
+    const fileCount = this.files.length;
+    const formText = this.parentNode.querySelector('.form-text');
+    if (fileCount > 0) {
+        formText.textContent = `已選擇 ${fileCount} 個檔案 | 支援格式：.csv`;
+    } else {
+        formText.textContent = '支援格式：.csv | 可一次選擇多個檔案';
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}上傳英文名稱 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-language me-2"></i>上傳菜單英文名稱
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">上傳包含英文名稱的CSV檔案，更新資料庫中菜牌的英文翻譯。</p>
+                
+                <form method="POST" enctype="multipart/form-data" id="uploadEnglishForm">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">選擇CSV檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required>
+                        <div class="form-text">支援格式：.csv</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>返回
+                        </a>
+                        <button type="submit" class="btn btn-success" id="submitBtn">
+                            <i class="fas fa-language me-1"></i>上傳英文名稱
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 檔案格式說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-file-csv me-2"></i>CSV檔案格式要求
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">CSV檔案必須包含以下欄位：</p>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i><strong>菜牌編號</strong> - 對應資料庫中的菜牌編號</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>英文名稱</strong> - 菜牌的英文翻譯</li>
+                    <li><i class="fas fa-check text-success me-2"></i><strong>資料表</strong> - 指定資料表名稱（med_sun, med_tpr, med_tpx）</li>
+                </ul>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>注意：</strong>如果發現重複的菜牌編號，系統會保留有英文名稱的記錄。
+                </div>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    支援的編碼格式：UTF-8（含BOM）、UTF-8、Big5、CP950、GBK
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('uploadEnglishForm').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>上傳中...';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

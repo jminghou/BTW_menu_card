@@ -1,0 +1,512 @@
+/* MediaTek 菜牌管理系統 - 簡潔設計 */
+
+/* 顏色變數 */
+:root {
+    --mediatek-orange: #E67E22;
+    --mediatek-orange-light: #F39C12;
+    --mediatek-orange-dark: #D35400;
+    --by-the-way-cyan: #17A2B8;
+    --by-the-way-cyan-light: #20C997;
+    --by-the-way-cyan-dark: #138496;
+    --gray-50: #F8F9FA;
+    --gray-100: #F1F3F4;
+    --gray-200: #E9ECEF;
+    --gray-300: #DEE2E6;
+    --gray-400: #CED4DA;
+    --gray-500: #ADB5BD;
+    --gray-600: #6C757D;
+    --gray-700: #495057;
+    --gray-800: #343A40;
+    --gray-900: #212529;
+    --white: #FFFFFF;
+    --success: #28A745;
+    --danger: #DC3545;
+    --warning: #FFC107;
+    --info: var(--by-the-way-cyan);
+}
+
+/* 基礎樣式 */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--gray-50);
+    color: var(--gray-800);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1;
+}
+
+/* 導航欄 */
+.navbar {
+    background-color: var(--white) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    border-bottom: 3px solid var(--mediatek-orange);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--gray-800) !important;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand img {
+    height: 32px;
+    margin-right: 12px;
+}
+
+.navbar-nav .nav-link {
+    color: var(--gray-600) !important;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--mediatek-orange) !important;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    border-radius: 8px;
+}
+
+.dropdown-item:hover {
+    background-color: var(--gray-100);
+    color: var(--mediatek-orange);
+}
+
+/* 英雄區塊 */
+.hero-section {
+    background: linear-gradient(135deg, var(--white) 0%, var(--gray-100) 100%);
+    border: 2px solid var(--gray-200);
+    border-left: 6px solid var(--by-the-way-cyan);
+    color: var(--gray-800) !important;
+}
+
+.hero-section .display-4 {
+    background: linear-gradient(45deg, var(--mediatek-orange), var(--by-the-way-cyan));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+
+.hero-section .lead {
+    color: var(--gray-600) !important;
+}
+
+/* 卡片樣式 */
+.card {
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: var(--gray-100) !important;
+    border-bottom: 1px solid var(--gray-200);
+    border-radius: 12px 12px 0 0 !important;
+    color: var(--gray-800) !important;
+    font-weight: 600;
+}
+
+/* 主色調卡片標題 */
+.card-header.bg-primary {
+    background-color: var(--mediatek-orange) !important;
+    color: var(--white) !important;
+}
+
+.card-header.bg-success {
+    background-color: var(--by-the-way-cyan) !important;
+    color: var(--white) !important;
+}
+
+.card-header.bg-info {
+    background-color: var(--by-the-way-cyan-dark) !important;
+    color: var(--white) !important;
+}
+
+.card-header.bg-warning {
+    background-color: var(--warning) !important;
+    color: var(--gray-800) !important;
+}
+
+.card-header.bg-secondary {
+    background-color: var(--gray-600) !important;
+    color: var(--white) !important;
+}
+
+.card-text {
+    color: var(--gray-600);
+    font-size: 0.95rem;
+}
+
+/* 按鈕樣式 */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+    border-width: 1px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* 主要按鈕 - MediaTek 橘色 */
+.btn-primary,
+.btn-outline-primary {
+    --bs-btn-color: var(--white);
+    --bs-btn-bg: var(--mediatek-orange);
+    --bs-btn-border-color: var(--mediatek-orange);
+    --bs-btn-hover-color: var(--white);
+    --bs-btn-hover-bg: var(--mediatek-orange-dark);
+    --bs-btn-hover-border-color: var(--mediatek-orange-dark);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--mediatek-orange);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-color: var(--white);
+}
+
+/* 次要按鈕 - 灰色系 */
+.btn-secondary,
+.btn-outline-secondary {
+    --bs-btn-color: var(--white);
+    --bs-btn-bg: var(--gray-600);
+    --bs-btn-border-color: var(--gray-600);
+    --bs-btn-hover-color: var(--white);
+    --bs-btn-hover-bg: var(--gray-700);
+    --bs-btn-hover-border-color: var(--gray-700);
+}
+
+.btn-outline-secondary {
+    --bs-btn-color: var(--gray-600);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-color: var(--white);
+}
+
+/* 成功按鈕 - 使用青色 */
+.btn-success,
+.btn-outline-success {
+    --bs-btn-color: var(--white);
+    --bs-btn-bg: var(--by-the-way-cyan);
+    --bs-btn-border-color: var(--by-the-way-cyan);
+    --bs-btn-hover-bg: var(--by-the-way-cyan-dark);
+    --bs-btn-hover-border-color: var(--by-the-way-cyan-dark);
+}
+
+.btn-outline-success {
+    --bs-btn-color: var(--by-the-way-cyan);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-color: var(--white);
+}
+
+/* 資訊按鈕 - 使用青色變體 */
+.btn-info,
+.btn-outline-info {
+    --bs-btn-color: var(--white);
+    --bs-btn-bg: var(--by-the-way-cyan-light);
+    --bs-btn-border-color: var(--by-the-way-cyan-light);
+    --bs-btn-hover-bg: var(--by-the-way-cyan);
+    --bs-btn-hover-border-color: var(--by-the-way-cyan);
+}
+
+.btn-outline-info {
+    --bs-btn-color: var(--by-the-way-cyan-light);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-color: var(--white);
+}
+
+/* 警告按鈕 */
+.btn-warning,
+.btn-outline-warning {
+    --bs-btn-color: var(--gray-800);
+    --bs-btn-bg: var(--warning);
+    --bs-btn-border-color: var(--warning);
+    --bs-btn-hover-bg: #e0a800;
+    --bs-btn-hover-border-color: #e0a800;
+}
+
+.btn-outline-warning {
+    --bs-btn-color: var(--warning);
+    --bs-btn-bg: transparent;
+    --bs-btn-hover-color: var(--gray-800);
+}
+
+/* 表單樣式 */
+.form-control {
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    background-color: var(--white);
+}
+
+.form-control:focus {
+    border-color: var(--mediatek-orange);
+    box-shadow: 0 0 0 0.2rem rgba(230, 126, 34, 0.25);
+    background-color: var(--white);
+}
+
+.form-label {
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    color: var(--gray-500);
+    font-size: 0.875rem;
+}
+
+/* 文件上傳樣式 */
+.form-control[type="file"]::-webkit-file-upload-button {
+    background-color: var(--mediatek-orange);
+    border: none;
+    border-radius: 6px;
+    color: var(--white);
+    padding: 0.5rem 1rem;
+    margin-right: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-control[type="file"]::-webkit-file-upload-button:hover {
+    background-color: var(--mediatek-orange-dark);
+}
+
+/* 警告訊息 */
+.alert {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 4px solid var(--success);
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 4px solid var(--danger);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 4px solid var(--warning);
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border-left: 4px solid var(--info);
+}
+
+/* 列表群組 */
+.list-group-item {
+    border: 1px solid var(--gray-200);
+    border-radius: 8px !important;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.list-group-item:hover {
+    background-color: var(--gray-50);
+    border-color: var(--mediatek-orange);
+}
+
+/* 模態框 */
+.modal-content {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--gray-200);
+    background-color: var(--gray-50);
+}
+
+/* 頁腳 */
+footer {
+    background: linear-gradient(135deg, var(--gray-50) 0%, var(--white) 100%);
+    border-top: 3px solid var(--by-the-way-cyan);
+    color: var(--gray-600);
+}
+
+footer .footer-logo {
+    height: 40px;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+footer .footer-logo:hover {
+    opacity: 1;
+}
+
+footer .footer-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+footer .footer-text {
+    margin: 0;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 576px) {
+    footer .footer-content {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    footer .footer-logo {
+        height: 32px;
+    }
+}
+
+/* 懸停效果 */
+.hover-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.12) !important;
+}
+
+/* 圖標顏色 */
+.text-primary {
+    color: var(--mediatek-orange) !important;
+}
+
+.text-success {
+    color: var(--by-the-way-cyan) !important;
+}
+
+.text-info {
+    color: var(--by-the-way-cyan-light) !important;
+}
+
+.text-warning {
+    color: var(--warning) !important;
+}
+
+.text-danger {
+    color: var(--danger) !important;
+}
+
+.text-cyan {
+    color: var(--by-the-way-cyan) !important;
+}
+
+.text-cyan-light {
+    color: var(--by-the-way-cyan-light) !important;
+}
+
+/* 載入動畫 */
+.spinner-border {
+    color: var(--mediatek-orange);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 2rem !important;
+    }
+    
+    .hero-section .display-4 {
+        font-size: 2rem;
+    }
+    
+    .navbar-brand img {
+        height: 28px;
+    }
+    
+    .card-body .d-grid.gap-2 > * {
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* 載入動畫 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card {
+    animation: fadeIn 0.6s ease-out;
+}
+
+/* 自定義捲軸 */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--mediatek-orange);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--mediatek-orange-dark);
+}
+
+/* 拖放區域 */
+.form-control.drag-over {
+    border-color: var(--mediatek-orange);
+    background-color: rgba(230, 126, 34, 0.05);
+}
+
+/* 特殊效果移除，保持簡潔 */
+.text-gradient {
+    color: var(--mediatek-orange);
+}
+
+/* 專注於功能的簡潔設計 */
+.btn-group .btn {
+    border-color: var(--gray-300);
+}
+
+.btn-group .btn.active {
+    background-color: var(--mediatek-orange);
+    border-color: var(--mediatek-orange);
+    color: var(--white);
+}

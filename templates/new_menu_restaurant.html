@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}新菜牌/新餐廳 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-plus-circle me-2"></i>新菜牌/新餐廳
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">根據指定的日期範圍，導出新增的菜牌或餐廳資料。</p>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <!-- 新菜牌 -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-utensils me-2"></i>新菜牌
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="newMenuForm">
+                            <input type="hidden" name="action" value="new_menu">
+                            <div class="mb-3">
+                                <label for="menu_date_range" class="form-label">日期範圍</label>
+                                <input type="text" class="form-control" id="menu_date_range" name="date_range" 
+                                       placeholder="YYYYMMDD-YYYYMMDD或YYYYMMDD" required>
+                                <div class="form-text">格式：20240101-20240131 或 20240101</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-utensils me-1"></i>導出新菜牌
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 新餐廳 -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-store me-2"></i>新餐廳
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" id="newRestaurantForm">
+                            <input type="hidden" name="action" value="new_restaurant">
+                            <div class="mb-3">
+                                <label for="restaurant_date_range" class="form-label">日期範圍</label>
+                                <input type="text" class="form-control" id="restaurant_date_range" name="date_range" 
+                                       placeholder="YYYYMMDD-YYYYMMDD或YYYYMMDD" required>
+                                <div class="form-text">格式：20240101-20240131 或 20240101</div>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-store me-1"></i>導出新餐廳
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 使用說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>使用說明
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-primary">新菜牌功能</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>導出指定日期範圍內新增的菜牌</li>
+                            <li><i class="fas fa-check text-success me-2"></i>包含菜牌編號和基本資訊</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Excel格式方便後續處理</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-success">新餐廳功能</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>導出指定日期範圍內新增的餐廳</li>
+                            <li><i class="fas fa-check text-success me-2"></i>包含餐廳編號和名稱</li>
+                            <li><i class="fas fa-check text-success me-2"></i>支援各據點餐廳資料</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    <strong>日期格式說明：</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>日期範圍：<code>20240101-20240131</code>（從2024年1月1日到1月31日）</li>
+                        <li>單一日期：<code>20240101</code>（僅2024年1月1日）</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>返回首頁
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// 為表單提交添加載入狀態
+document.querySelectorAll('form').forEach(form => {
+    form.addEventListener('submit', function() {
+        const button = this.querySelector('button[type="submit"]');
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>處理中...';
+        button.disabled = true;
+        
+        // 如果3秒後還沒有回應，恢復按鈕狀態
+        setTimeout(() => {
+            if (button.disabled) {
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }, 30000);
+    });
+});
+
+// 日期範圍輸入格式驗證
+document.querySelectorAll('input[name="date_range"]').forEach(input => {
+    input.addEventListener('input', function() {
+        const value = this.value;
+        const singleDatePattern = /^\d{8}$/;
+        const rangeDatePattern = /^\d{8}-\d{8}$/;
+        
+        if (value && !singleDatePattern.test(value) && !rangeDatePattern.test(value)) {
+            this.setCustomValidity('請輸入正確的日期格式：YYYYMMDD 或 YYYYMMDD-YYYYMMDD');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+});
+</script>
+{% endblock %}

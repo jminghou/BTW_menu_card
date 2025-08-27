@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}上傳資料庫 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-upload me-2"></i>上傳資料庫
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">將Excel檔案中的菜牌資料上傳到資料庫。請確保檔案包含必要的欄位。</p>
+                
+                <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">選擇Excel檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+                        <div class="form-text">支援格式：.xlsx, .xls</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>返回
+                        </a>
+                        <button type="submit" class="btn btn-success" id="submitBtn">
+                            <i class="fas fa-upload me-1"></i>上傳到資料庫
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 必要欄位說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>必要欄位
+                </h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-3">Excel檔案必須包含以下欄位：</p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>餐廳編號</li>
+                            <li><i class="fas fa-check text-success me-2"></i>餐廳名稱</li>
+                            <li><i class="fas fa-check text-success me-2"></i>餐點編號</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>菜牌編號</li>
+                            <li><i class="fas fa-check text-success me-2"></i>餐點名稱</li>
+                            <li><i class="fas fa-info text-info me-2"></i>英文名稱（選填）</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    系統會根據據點資訊自動將資料分類到對應的資料表（瑞光、行善、太陽廣場）。
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>上傳中...';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}

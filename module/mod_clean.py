@@ -128,27 +128,16 @@ def clean_excel_file():
         file_dir = os.path.dirname(file_path)
         original_name = os.path.splitext(os.path.basename(file_path))[0]
 
+        # 統一儲存為完整檔案，不再分據點
         if location_col:
-            # 定義三個據點名稱
-            locations = ["聯發科瑞光", "聯發科行善", "聯發太陽廣場"]
-            
-            # 儲存完整檔案
-            complete_file_path = os.path.join(file_dir, f"{original_name}_完整.xlsx")
-            df.to_excel(complete_file_path, index=False)
-            
-            # 為每個據點創建獨立的DataFrame並儲存
-            for location in locations:
-                location_df = df[df[location_col] == location].copy()
-                
-                if not location_df.empty:
-                    new_file_path = os.path.join(file_dir, f"{original_name}_{location}.xlsx")
-                    location_df.to_excel(new_file_path, index=False)
-            
-            messagebox.showinfo("成功", f"檔案已依據點分類並存在：\n{file_dir}\n包含完整檔案及各據點檔案")
+            # 如果有據點欄位，檔名加上 "_完整"
+            new_file_path = os.path.join(file_dir, f"{original_name}_完整.xlsx")
         else:
+            # 如果沒有據點欄位，檔名加上 "_cleaned"
             new_file_path = os.path.join(file_dir, f"{original_name}_cleaned.xlsx")
-            df.to_excel(new_file_path, index=False)
-            messagebox.showinfo("成功", f"文件已清理完成並保存為：\n{new_file_path}")
+        
+        df.to_excel(new_file_path, index=False)
+        messagebox.showinfo("成功", f"文件已清理完成並保存為：\n{new_file_path}")
         
     except Exception as e:
         messagebox.showerror("錯誤", f"處理過程中發生錯誤：{str(e)}") 

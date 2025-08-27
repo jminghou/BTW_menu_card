@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}資料庫功能 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-database me-2"></i>資料庫功能
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">管理資料庫中的菜牌資料，包括重複資料處理和資料匯出。</p>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <!-- 刪除重複資料 -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-trash-alt me-2"></i>刪除重複菜牌編號
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">檢查並刪除資料庫中重複的菜牌編號，保持資料唯一性。</p>
+                        <button class="btn btn-warning" id="removeDuplicatesBtn" onclick="removeDuplicates()">
+                            <i class="fas fa-trash-alt me-1"></i>刪除重複資料
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下載所有菜牌 -->
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-download me-2"></i>下載所有菜牌
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">導出資料庫中所有菜牌資料為Excel檔案。</p>
+                        <a href="{{ url_for('download_all') }}" class="btn btn-info">
+                            <i class="fas fa-download me-1"></i>下載菜牌資料
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>操作說明
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="text-warning">刪除重複資料</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>自動檢測重複的菜牌編號</li>
+                            <li><i class="fas fa-check text-success me-2"></i>保留最新的資料記錄</li>
+                            <li><i class="fas fa-check text-success me-2"></i>清理資料庫冗餘資料</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-info">下載菜牌資料</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>包含所有據點的菜牌資料</li>
+                            <li><i class="fas fa-check text-success me-2"></i>Excel格式便於後續處理</li>
+                            <li><i class="fas fa-check text-success me-2"></i>包含中英文名稱對照</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i>返回首頁
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 結果顯示模態框 -->
+<div class="modal fade" id="resultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">操作結果</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="resultContent">
+                <!-- 結果內容將在這裡顯示 -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function removeDuplicates() {
+    const btn = document.getElementById('removeDuplicatesBtn');
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>處理中...';
+    btn.disabled = true;
+    
+    fetch('{{ url_for("remove_duplicates") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+        const content = document.getElementById('resultContent');
+        
+        if (data.success) {
+            content.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>${data.message}
+                </div>
+            `;
+        } else {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>${data.message}
+                </div>
+            `;
+        }
+        
+        modal.show();
+    })
+    .catch(error => {
+        const modal = new bootstrap.Modal(document.getElementById('resultModal'));
+        const content = document.getElementById('resultContent');
+        content.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle me-2"></i>發生錯誤：${error.message}
+            </div>
+        `;
+        modal.show();
+    })
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

@@ -38,6 +38,7 @@ Thumbs.db
 input/
 output/
 *.xlsx
-*.xls 
+*.xls
+*.csv 
 
-delete/
+菜牌列印/

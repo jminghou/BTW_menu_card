@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}首頁 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="hero-section rounded-3 p-5 mb-5">
+    <div class="text-center">
+        <h1 class="display-4 fw-bold text-primary">
+            菜牌管理系統
+        </h1>
+        <p class="lead">聯發科內部輪動櫃位專用</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- 檔案處理功能 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm hover-card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-file-excel me-2"></i>第1步：檔案處理
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">處理Excel檔案、產生菜牌編號和格式轉換</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('clean_excel') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-broom me-1"></i>資料清洗
+                    </a>
+                    <a href="{{ url_for('generate_menu_codes') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-code me-1"></i>菜牌編號產生
+                    </a>
+                    <!-- <a href="{{ url_for('convert_csv') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-exchange-alt me-1"></i>CSV轉TXT
+                    </a> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 資料庫管理 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm hover-card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-database me-2"></i>第2步：資料庫處理
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">資料庫上傳、英文名稱管理和資料維護</p>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('upload_database') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-upload me-1"></i>上傳資料庫
+                    </a>
+                    <a href="{{ url_for('download_no_english') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-file-download me-1"></i>下載無英文菜單
+                    </a>
+                    <a href="{{ url_for('upload_english') }}" class="btn btn-outline-success btn-sm">
+                        <i class="fas fa-language me-1"></i>上傳英文名稱
+                    </a>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 下載功能 -->
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm hover-card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-download me-2"></i>第3步：完成菜牌
+                </h5>
+            </div>
+            <div class="card-body">
+                <p class="card-text">下載各種菜牌資料和報表</p>
+                <div class="d-grid gap-2">
+                    
+                    <a href="{{ url_for('new_menu_restaurant') }}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-plus-circle me-1"></i>新菜牌/新餐廳
+                    </a>
+                    <a href="{{ url_for('download_all') }}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-download me-1"></i>下載所有菜牌
+                    </a>
+                    <a href="{{ url_for('database_functions') }}" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-tools me-1"></i>資料庫功能
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 系統功能介紹 -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>系統功能說明
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-primary">檔案處理</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-primary me-2"></i>Excel資料清洗與格式化</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>自動產生菜牌編號</li>
+                            <li><i class="fas fa-check text-primary me-2"></i>CSV轉TXT格式轉換</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-success">資料庫管理</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i>批量上傳菜牌資料</li>
+                            <li><i class="fas fa-check text-success me-2"></i>管理菜單英文名稱</li>
+                            <li><i class="fas fa-check text-success me-2"></i>刪除重複資料</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-info">下載功能</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-info me-2"></i>導出無英文菜單清單</li>
+                            <li><i class="fas fa-check text-info me-2"></i>按日期範圍查詢新菜牌</li>
+                            <li><i class="fas fa-check text-info me-2"></i>下載完整菜牌資料庫</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

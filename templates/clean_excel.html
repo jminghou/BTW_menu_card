@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}資料清洗 - 菜牌管理系統{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="card-title mb-0">
+                    <i class="fas fa-broom me-2"></i>資料清洗
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">上傳Excel檔案進行資料清洗，系統會自動處理價格欄位、日期格式和據點資訊。</p>
+                
+                <form method="POST" enctype="multipart/form-data" id="cleanForm">
+                    <div class="mb-4">
+                        <label for="file" class="form-label">選擇Excel檔案</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".xlsx,.xls" required>
+                        <div class="form-text">支援格式：.xlsx, .xls</div>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>返回
+                        </a>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-broom me-1"></i>開始清洗
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 功能說明 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h6 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>功能說明
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>自動刪除包含"售價"的欄位</li>
+                    <li><i class="fas fa-check text-success me-2"></i>將日期格式轉換為 MM/DD</li>
+                    <li><i class="fas fa-check text-success me-2"></i>移除據點名稱中的"-內部"字串</li>
+                    <li><i class="fas fa-check text-success me-2"></i>處理分店、餐廳相關欄位</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('cleanForm').addEventListener('submit', function() {
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>處理中...';
+    submitBtn.disabled = true;
+});
+</script>
+{% endblock %}
